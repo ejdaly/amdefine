@@ -3,7 +3,8 @@ var inserted,
     Module = require('module'),
     fs = require('fs'),
     existingExtFn = Module._extensions['.js'],
-    amdefineRegExp = /amdefine\.js/;
+    amdefineRegExp = /amdefine\.js/,
+    matcher = function() { return true; };
 
 inserted  = "if (typeof define !== 'function') {var define = require('amdefine')(module)}";
 
@@ -22,7 +23,7 @@ function stripBOM(content) {
 function intercept(module, filename) {
     var content = stripBOM(fs.readFileSync(filename, 'utf8'));
 
-    if (!amdefineRegExp.test(module.id)) {
+    if (!amdefineRegExp.test(module.id) && matcher(module.id)) {
         content = inserted + content;
     }
 
@@ -33,4 +34,13 @@ intercept._id = 'amdefine/intercept';
 
 if (!existingExtFn._id || existingExtFn._id !== intercept._id) {
     Module._extensions['.js'] = intercept;
+}
+
+module.exports = {
+    setMatcher: function(matcher_function) {
+        if(typeof matcher_function !== "function") {
+            throw new Error("[amdefine:intercept] matcher is not a function");
+        }
+        matcher = matcher_function;
+    }
 }

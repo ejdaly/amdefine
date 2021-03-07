@@ -294,7 +294,8 @@ function amdefine(module, requireFn) {
     };
 
     define.amd = {};
-    define.isNode = true;
+    define.isBrowser = false;
+    define.isNodeJS  = true;
 
     return define;
 }
